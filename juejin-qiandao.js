@@ -65,6 +65,41 @@ const dipLucky = async () => {
   }
 }
 
+// 收集bug 待测试
+const bugFix = async () => {
+
+  // bug list
+  // https://api.juejin.cn/user_api/v1/bugfix/not_collect?aid=2608&uuid=7069996992693732879
+  const bugs = await fetch('https://api.juejin.cn/user_api/v1/bugfix/not_collect', {
+    headers: {
+      cookie: process.env.JUEJIN_COOKIE
+    },
+    method: 'POST',
+    credentials: 'include'
+  }).then(res => res.json())
+
+  // but fix
+  // { bug_time: 1658678400, bug_type: 8 }
+  // https://api.juejin.cn/user_api/v1/bugfix/collect?aid=2608&uuid=7069996992693732879
+  if(bugs.err_no !== 0) return console.warn('bugs获取失败');
+  const total = bugs.data.length;
+  let count = 0;
+  console.log(`发现${total} 个bug, 准备清除中...`)
+  for(let bug of bugs.data) {
+    const collect = await fetch('https://api.juejin.cn/user_api/v1/bugfix/collect', {
+      headers: {
+        cookie: process.env.JUEJIN_COOKIE
+      },
+      method: 'POST',
+      credentials: 'include',
+      body: `{bug_time: ${bug.bug_time}, bug_type: ${bug.bug_type}`
+    })
+    if(collect.err_no === 0) {
+      count++;
+    }
+  }
+  console.log(`收集bug成功: ${count}, 失败: ${total - count}`);
+}
 // 签到
 (async () => {
 
@@ -81,7 +116,8 @@ const dipLucky = async () => {
   if (today_status.data) {
     console.log('今日已经签到！');
     drawFn();
-    dipLucky()
+    dipLucky();
+    bugFix();
     return;
   }
 
@@ -98,4 +134,5 @@ const dipLucky = async () => {
   console.log(`签到成功！当前积分；${check_in.data.sum_point}`);
   drawFn();
   dipLucky()
+  bugFix();
 })();
