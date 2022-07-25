@@ -111,7 +111,7 @@ const bugFix = async () => {
     method: 'GET',
     credentials: 'include'
   }).then((res) => res.json());
-  console.log(today_status, process.env.JUEJIN_COOKIE)
+  
   if (today_status.err_no !== 0) return console.warn('签到失败！');
   if (today_status.data) {
     console.log('今日已经签到！');
