@@ -86,14 +86,16 @@ const bugFix = async () => {
   let count = 0;
   console.log(`发现${total} 个bug, 准备清除中...`)
   for(let bug of bugs.data) {
+    const dt =  { bug_time:  bug.bug_time, bug_type:  bug.bug_type  };
     const collect = await fetch('https://api.juejin.cn/user_api/v1/bugfix/collect', {
       headers: {
         cookie: process.env.JUEJIN_COOKIE
       },
       method: 'POST',
       credentials: 'include',
-      body: `{bug_time: ${bug.bug_time}, bug_type: ${bug.bug_type}`
-    })
+      body: JSON.stringify(dt)
+    }).then(res => res.json())
+
     if(collect.err_no === 0) {
       count++;
     }
